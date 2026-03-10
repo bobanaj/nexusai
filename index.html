@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07100a;--panel:#0c1a0f;--border:rgba(80,140,60,0.2);--green:#4a9e5c;--green2:#6dc47f;--green3:#a8e0b0;--gold:#c8a84a;--gold2:#e8c870;--text:#d0e8d4;--muted:#6a8a6e;--dim:#3a5a3e;--red:#c05040;--white:#f0f4ee}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Outfit',sans-serif;color:var(--text);display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 60% 40% at 10% 5%,rgba(40,80,30,0.5) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 90% 90%,rgba(30,60,20,0.4) 0%,transparent 60%)}
+.screen{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+.screen.hidden{display:none!important}
+.auth-box{position:relative;z-index:1;width:100%;max-width:400px;background:rgba(12,26,16,0.95);border:1px solid rgba(80,140,60,0.3);border-radius:20px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,0.6),inset 0 1px 0 rgba(80,140,60,0.15);max-height:90vh;overflow-y:auto}
+.auth-box::-webkit-scrollbar{width:3px}.auth-box::-webkit-scrollbar-thumb{background:var(--dim)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-name{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:600;font-style:italic;color:var(--green2);text-shadow:0 0 30px rgba(109,196,127,0.4);letter-spacing:4px;line-height:1}
+.auth-name span{color:var(--gold)}
+.auth-tag{font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);letter-spacing:3px;margin-top:6px;text-transform:uppercase}
+.auth-tabs{display:flex;border:1px solid var(--border);border-radius:10px;margin-bottom:24px;overflow:hidden}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:0.8rem;font-weight:600;cursor:pointer;color:var(--muted);background:transparent;border:none;font-family:'Outfit',sans-serif;transition:all 0.2s}
+.auth-tab.on{background:rgba(74,158,92,0.2);color:var(--green2)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:0.68rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.field input{width:100%;background:rgba(7,16,10,0.8);border:1px solid var(--border);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:0.88rem;padding:10px 13px;outline:none;transition:border-color 0.2s}
+.field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(74,158,92,0.1)}
+.field input::placeholder{color:var(--dim)}
+.abtn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--green),#3a8a4a);color:var(--white);font-family:'Outfit',sans-serif;font-weight:700;font-size:0.88rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:4px}
+.abtn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.aerr{background:rgba(192,80,64,0.15);border:1px solid rgba(192,80,64,0.3);border-radius:8px;padding:9px 13px;font-size:0.76rem;color:#e07060;margin-top:12px;text-align:center;font-family:'DM Mono',monospace;display:none}
+.aerr.show{display:block}
+.acc-section{margin-bottom:18px}
+.acc-label{font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.acc-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(40,70,30,0.2);border:1px solid var(--border);border-radius:9px;margin-bottom:5px;cursor:pointer;transition:all 0.15s}
+.acc-item:hover{background:rgba(74,158,92,0.15);border-color:var(--green)}
+.acc-name{font-weight:600;font-size:0.85rem;color:var(--green3)}
+.acc-info{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)}
+.acc-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:0.72rem;padding:2px 6px;transition:color 0.15s}
+.acc-del:hover{color:var(--red)}
+#appScreen{display:none;flex-direction:column;height:100vh;position:relative;z-index:1}
+#appScreen.active{display:flex}
+.sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:29}
+.sov.on{display:block}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:rgba(6,14,8,0.98);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:30;transform:translateX(-100%);transition:transform 0.28s ease}
+.sidebar.on{transform:translateX(0)}
+.sb-head{padding:18px 14px 12px;border-bottom:1px solid var(--border)}
+.sb-logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;font-style:italic;color:var(--green2);letter-spacing:3px}
+.sb-logo span{color:var(--gold)}
+.sb-user{font-size:0.72rem;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+.sb-sec{padding:10px 14px 4px;font-family:'DM Mono',monospace;font-size:0.57rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
+.new-btn{margin:8px 10px;padding:8px 12px;background:rgba(74,158,92,0.12);border:1px solid rgba(74,158,92,0.25);border-radius:8px;color:var(--green2);font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;text-align:left;width:calc(100% - 20px)}
+.new-btn:hover{background:rgba(74,158,92,0.22)}
+.conv-list{flex:1;overflow-y:auto;padding:2px 6px}
+.conv-list::-webkit-scrollbar{width:3px}.conv-list::-webkit-scrollbar-thumb{background:var(--dim)}
+.conv-item{display:flex;align-items:center;gap:5px;padding:8px 9px;border-radius:7px;cursor:pointer;transition:background 0.15s;margin-bottom:1px}
+.conv-item:hover,.conv-item.on{background:rgba(74,158,92,0.14)}
+.conv-title{flex:1;font-size:0.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conv-item.on .conv-title,.conv-item:hover .conv-title{color:var(--green3)}
+.conv-del{opacity:0;background:none;border:none;color:var(--dim);cursor:pointer;font-size:0.68rem;padding:1px 4px;flex-shrink:0}
+.conv-item:hover .conv-del{opacity:1}
+.conv-del:hover{color:var(--red)}
+.sb-foot{padding:10px;border-top:1px solid var(--border)}
+.sw-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Outfit',sans-serif;font-size:0.73rem;cursor:pointer;transition:all 0.15s}
+.sw-btn:hover{border-color:var(--green);color:var(--green2)}
+.app-head{display:flex;align-items:center;gap:10px;padding:9px 14px;background:rgba(6,14,8,0.98);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:20}
+.app-head::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),var(--gold),var(--green),transparent);opacity:0.4}
+.menu-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:3px;line-height:1;transition:color 0.15s}
+.menu-btn:hover{color:var(--green2)}
+.head-title{flex:1;font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;font-style:italic;color:var(--green2);letter-spacing:2px}
+.head-title span{color:var(--gold)}
+.att-sel{background:rgba(40,70,30,0.3);border:1px solid var(--border);border-radius:7px;color:var(--green3);font-family:'DM Mono',monospace;font-size:0.62rem;padding:5px 9px;cursor:pointer;outline:none}
+.save-ind{font-family:'DM Mono',monospace;font-size:0.57rem;letter-spacing:1px;white-space:nowrap;color:var(--dim);transition:color 0.3s}
+.save-ind.saving{color:var(--gold)}.save-ind.saved{color:var(--green)}
+.lvl-pill{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--gold);background:rgba(200,168,74,0.1);border:1px solid rgba(200,168,74,0.2);padding:3px 9px;border-radius:12px;white-space:nowrap}
+#chat{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+#chat::-webkit-scrollbar{width:4px}
+#chat::-webkit-scrollbar-thumb{background:var(--dim)}
+.msg{display:flex;gap:9px;max-width:88%;animation:fup 0.25s ease}
+@keyframes fup{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.ai{align-self:flex-start}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.msg.user .av{background:linear-gradient(135deg,#2a3a1a,#3a5020);border:1.5px solid rgba(74,158,92,0.35);font-size:0.6rem;color:var(--gold);font-family:'DM Mono',monospace;font-weight:500}
+.msg.ai .av{background:linear-gradient(135deg,#122010,#1c3018);border:1.5px solid rgba(74,158,92,0.25);font-size:1rem}
+.bubble{padding:10px 15px;font-size:0.88rem;line-height:1.75;font-weight:300;word-break:break-word;max-width:100%}
+.msg.user .bubble{background:rgba(74,158,92,0.1);border:1px solid rgba(74,158,92,0.2);border-radius:13px 3px 13px 13px;color:var(--white)}
+.msg.ai .bubble{background:rgba(12,26,16,0.85);border:1px solid rgba(74,158,92,0.13);border-radius:3px 13px 13px 13px;color:var(--text)}
+.bubble strong{color:var(--gold2);font-weight:600}
+.bubble pre{background:rgba(3,8,3,0.95);border:1px solid rgba(74,158,92,0.13);border-left:2px solid var(--green);border-radius:8px;padding:13px;margin:9px 0;overflow-x:auto;font-family:'DM Mono',monospace;font-size:0.76rem;line-height:1.65;color:#88cc60;position:relative}
+.bubble pre::before{content:'{ }';position:absolute;top:4px;right:8px;font-size:0.52rem;color:var(--dim)}
+.bubble code{font-family:'DM Mono',monospace;font-size:0.82em;background:rgba(74,158,92,0.1);padding:1px 5px;border-radius:3px;color:var(--green2)}
+.bubble pre code{background:none;padding:0;color:inherit}
+.typing-ind{display:flex;gap:5px;align-items:center;padding:3px 0}
+.typing-ind span{width:6px;height:6px;border-radius:50%;animation:boun 1.3s infinite}
+.typing-ind span:nth-child(1){background:var(--green)}
+.typing-ind span:nth-child(2){background:var(--green2);animation-delay:0.2s}
+.typing-ind span:nth-child(3){background:var(--dim);animation-delay:0.4s}
+@keyframes boun{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+.lflash{display:inline-block;margin-top:5px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--gold);opacity:0.55;padding:2px 7px;background:rgba(200,168,74,0.05);border-radius:4px}
+.notif{text-align:center;font-family:'DM Mono',monospace;font-size:0.62rem;padding:4px;letter-spacing:1px;opacity:0.55}
+.notif.gold{color:var(--gold)}.notif.green{color:var(--green)}.notif.red{color:var(--red)}
+.game-wrap{margin:9px 0;border:1px solid rgba(74,158,92,0.28);border-radius:10px;overflow:hidden;background:#000}
+.game-head{display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:rgba(12,26,16,0.95);border-bottom:1px solid rgba(74,158,92,0.18)}
+.game-tag{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--green);letter-spacing:1px}
+.game-btn{background:linear-gradient(135deg,var(--green),#3a8a4a);color:var(--white);border:none;border-radius:6px;padding:5px 14px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.76rem;cursor:pointer;transition:all 0.2s}
+.game-btn:hover{filter:brightness(1.2);transform:translateY(-1px)}
+.game-zone iframe{width:100%;height:450px;border:none;display:block}
+.welcome{text-align:center;margin:auto;padding:28px 16px;max-width:460px}
+.w-big{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,8vw,5rem);font-weight:600;font-style:italic;color:var(--green2);text-shadow:0 0 28px rgba(109,196,127,0.28);line-height:1}
+.w-big span{color:var(--gold)}
+.w-div{width:55px;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);margin:10px auto}
+.w-sub{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px}
+.chip{background:rgba(18,36,12,0.6);border:1px solid rgba(74,158,92,0.22);border-radius:15px;padding:6px 13px;font-size:0.76rem;cursor:pointer;transition:all 0.15s;color:var(--text)}
+.chip:hover{background:rgba(74,158,92,0.14);border-color:var(--green);color:var(--white);transform:translateY(-1px)}
+.inp-zone{padding:11px 13px;border-top:1px solid var(--border);background:rgba(5,12,7,0.98);flex-shrink:0}
+.inp-row{display:flex;gap:7px;align-items:flex-end}
+textarea{flex:1;background:rgba(8,18,10,0.9);border:1px solid rgba(74,158,92,0.22);border-radius:11px;color:var(--white);font-family:'Outfit',sans-serif;font-size:0.88rem;padding:10px 13px;resize:none;outline:none;min-height:42px;max-height:130px;line-height:1.5;transition:border-color 0.2s}
+textarea:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(74,158,92,0.09)}
+textarea::placeholder{color:var(--dim)}
+#sendBtn{background:linear-gradient(135deg,var(--green),#3a8a4a);color:var(--white);border:none;border-radius:11px;padding:0 17px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;height:42px;text-transform:uppercase}
+#sendBtn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+#sendBtn:active{transform:translateY(0)}
+#sendBtn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+.hint{text-align:center;font-size:0.55rem;color:var(--dim);margin-top:5px;font-family:'DM Mono',monospace}
+.err-msg{color:#d06050;font-family:'DM Mono',monospace;font-size:0.8rem}
+</style>
+</head>
+<body>
+
+<div id="authScreen" class="screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-name">Ne<span>x</span>us</div>
+      <div class="auth-tag">// clash &amp; code // intelligence artificielle //</div>
+    </div>
+    <div id="existingAccs" style="display:none">
+      <div class="acc-section">
+        <div class="acc-label">Comptes existants</div>
+        <div id="accList"></div>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" onclick="switchTab('login')">Connexion</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Créer un compte</button>
+    </div>
+    <div id="loginForm">
+      <div class="field"><label>Nom d'utilisateur</label><input id="lUser" placeholder="ton pseudo" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="abtn" onclick="doLogin()">Entrer dans NEXUS</button>
+    </div>
+    <div id="signupForm" style="display:none">
+      <div class="field"><label>Nom d'utilisateur</label><input id="sUser" placeholder="choisis un pseudo"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="sPass" placeholder="min. 4 caractères"></div>
+      <div class="field"><label>Confirmer</label><input type="password" id="sPass2" placeholder="répète le mot de passe" onkeydown="if(event.key==='Enter')doSignup()"></div>
+      <button class="abtn" onclick="doSignup()">Créer mon compte</button>
+    </div>
+    <div class="aerr" id="authErr"></div>
+  </div>
+</div>
+
+<div id="appScreen">
+  <div class="sov" id="sov" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">Ne<span>x</span>us</div>
+      <div class="sb-user" id="sbUser"></div>
+    </div>
+    <button class="new-btn" onclick="newConvo()">+ Nouvelle conversation</button>
+    <div class="sb-sec">Conversations</div>
+    <div class="conv-list" id="convList"></div>
+    <div class="sb-foot"><button class="sw-btn" onclick="switchAccount()">Changer de compte</button></div>
+  </div>
+  <div class="app-head">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="head-title">Ne<span>x</span>us</div>
+    <select class="att-sel" id="attSel" onchange="changeAttitude(this.value)">
+      <option value="clash">💀 Clash brutal</option>
+      <option value="sarcastic">😏 Sarcastique</option>
+      <option value="mentor">🎓 Mentor sévère</option>
+      <option value="hype">🔥 Hype man</option>
+      <option value="zen">🍃 Zen froid</option>
+      <option value="robot">🤖 Robot froid</option>
+    </select>
+    <div class="save-ind" id="saveInd">◉ prêt</div>
+    <div class="lvl-pill" id="lvlPill">🌱 LVL 1</div>
+  </div>
+  <div id="chat"></div>
+  <div class="inp-zone">
+    <div class="inp-row">
+      <textarea id="msgInp" placeholder="Pose ta question... si t'oses." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <button id="sendBtn" onclick="sendMessage()">Envoyer</button>
+    </div>
+    <div class="hint">ENTER envoyer · SHIFT+ENTER nouvelle ligne · messages illimités · sauvegarde auto</div>
+  </div>
+</div>
+
+<script>
+const ATTITUDES={clash:{prompt:"Tu CLASHE l'utilisateur à CHAQUE message sans exception. Insultes affectueuses créatives différentes à chaque fois (espèce de débile, cerveau en mode avion, grille-pain cassé...). Clash EN PREMIER, puis tu aides vraiment."},sarcastic:{prompt:"Tu es extrêmement sarcastique. Soupirs, commentaires en aparté. Mais tu donnes la réponse complète."},mentor:{prompt:"Mentor ultra-exigeant. Tu pointes les failles, questions socratiques dures. Réponse + défis."},hype:{prompt:"Hype man absurde. Chaque question est LA MEILLEURE 🔥. Tu EXAGÈRES tout positivement."},zen:{prompt:"Entité zen et froide. Métaphores de nature. Réponses courtes, poétiques, condescendantes."},robot:{prompt:"Robot sans émotion. Langage système (ERREUR_HUMAINE_DÉTECTÉE...). Factuel, clinique."}};
+let currentUser=null,currentConvoId=null,messages=[],isLoading=false;
+let memory={lessons:[],totalMessages:0,level:1};
+let attitude='clash';
+const S={set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},get(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null}catch(e){return null}},del(k){try{localStorage.removeItem(k)}catch(e){}},keys(p){try{return Object.keys(localStorage).filter(k=>k.startsWith(p))}catch(e){return[]}}};
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function hash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return h.toString(16)}
+function scroll(){const c=document.getElementById('chat');if(c)c.scrollTop=999999}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,130)+'px'}
+function formatReply(text){
+  text=text.replace(/===NEXUS_LEARN===[\s\S]*?===END_LEARN===/g,'').trim();
+  text=text.replace(/```game\n?([\s\S]*?)```/gi,(_,code)=>{const id='gm'+Math.random().toString(36).slice(2,8);const enc=encodeURIComponent(code.trim());return `<div class="game-wrap"><div class="game-head"><span class="game-tag">🎮 JEU JOUABLE</span><button class="game-btn" onclick="launchGame('${id}',decodeURIComponent('${enc}'))">▶ Lancer</button></div><div class="game-zone" id="${id}"></div></div>`;});
+  text=text.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${esc(c.trim())}</code></pre>`);
+  text=text.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/\n/g,'<br>');
+  return text;
+}
+function launchGame(id,html){const z=document.getElementById(id);if(!z)return;z.innerHTML='';const iframe=document.createElement('iframe');iframe.style.cssText='width:100%;height:450px;border:none;display:block';iframe.setAttribute('sandbox','allow-scripts allow-same-origin');z.appendChild(iframe);const doc=iframe.contentDocument||iframe.contentWindow.document;doc.open();doc.write(html);doc.close();scroll()}
+function showErr(msg){const e=document.getElementById('authErr');e.textContent=msg;e.classList.toggle('show',!!msg)}
+function loadAccounts(){const keys=S.keys('user:');const box=document.getElementById('existingAccs');const list=document.getElementById('accList');list.innerHTML='';if(!keys.length){box.style.display='none';return}box.style.display='';keys.forEach(k=>{const u=k.replace('user:','');const convs=S.keys('convo:'+u+':').length;const div=document.createElement('div');div.className='acc-item';div.innerHTML=`<div><div class="acc-name">${esc(u)}</div><div class="acc-info">${convs} conv.</div></div><button class="acc-del" onclick="event.stopPropagation();delAccount('${esc(u)}')">✕</button>`;div.addEventListener('click',()=>{document.getElementById('lUser').value=u;switchTab('login')});list.appendChild(div)})}
+function delAccount(u){if(!confirm('Supprimer le compte "'+u+'" ?'))return;S.del('user:'+u);S.keys('convo:'+u+':').forEach(k=>S.del(k));S.del('memory:'+u);loadAccounts()}
+function switchTab(tab){document.getElementById('loginForm').style.display=tab==='login'?'':'none';document.getElementById('signupForm').style.display=tab==='signup'?'':'none';document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('on',(tab==='login'&&i===0)||(tab==='signup'&&i===1)));showErr('')}
+function doLogin(){const u=document.getElementById('lUser').value.trim();const p=document.getElementById('lPass').value;if(!u||!p){showErr('Remplis tous les champs.');return}const ud=S.get('user:'+u);if(!ud){showErr('Compte introuvable. Crée-en un !');return}if(ud.passwordHash!==hash(p)){showErr('Mot de passe incorrect.');return}enterApp(u)}
+function doSignup(){const u=document.getElementById('sUser').value.trim();const p=document.getElementById('sPass').value;const p2=document.getElementById('sPass2').value;if(!u||!p||!p2){showErr('Remplis tous les champs.');return}if(u.length<2){showErr('Pseudo trop court.');return}if(p.length<4){showErr('Mot de passe trop court (min. 4).');return}if(p!==p2){showErr('Mots de passe différents.');return}if(S.get('user:'+u)){showErr('Ce pseudo est déjà pris.');return}S.set('user:'+u,{passwordHash:hash(p),createdAt:Date.now()});enterApp(u)}
+function enterApp(username){currentUser=username;memory=S.get('memory:'+username)||{lessons:[],totalMessages:0,level:1};document.getElementById('authScreen').classList.add('hidden');document.getElementById('appScreen').classList.add('active');document.getElementById('sbUser').textContent='👤 '+username;updateLvl();refreshConvList();const keys=S.keys('convo:'+username+':');if(keys.length){keys.sort();loadConvo(keys[keys.length-1])}else newConvo()}
+function switchAccount(){currentUser=null;messages=[];document.getElementById('appScreen').classList.remove('active');document.getElementById('authScreen').classList.remove('hidden');document.getElementById('lUser').value='';document.getElementById('lPass').value='';closeSidebar();loadAccounts()}
+function newConvo(){currentConvoId='convo:'+currentUser+':'+Date.now();messages=[];renderChat();refreshConvList();closeSidebar()}
+function loadConvo(key){const data=S.get(key)||{messages:[]};currentConvoId=key;messages=data.messages||[];renderChat();refreshConvList();closeSidebar();setTimeout(scroll,50)}
+function delConvo(key){S.del(key);if(key===currentConvoId)newConvo();else refreshConvList()}
+function refreshConvList(){const list=document.getElementById('convList');if(!list)return;const keys=S.keys('convo:'+currentUser+':');if(!keys.length){list.innerHTML='<div style="padding:10px;font-size:0.72rem;color:var(--dim)">Aucune conversation</div>';return}const convos=keys.map(k=>{const d=S.get(k)||{};return{key:k,title:d.title||'Nouvelle conversation',upd:d.updatedAt||0}});convos.sort((a,b)=>b.upd-a.upd);list.innerHTML=convos.map(c=>`<div class="conv-item ${c.key===currentConvoId?'on':''}" onclick="loadConvo('${c.key}')"><span class="conv-title">${esc(c.title)}</span><button class="conv-del" onclick="event.stopPropagation();delConvo('${c.key}')">✕</button></div>`).join('')}
+function setSave(s){const el=document.getElementById('saveInd');el.className='save-ind '+s;el.textContent=s==='saving'?'◉ sauvegarde...':s==='saved'?'◉ sauvegardé':'◉ prêt';if(s==='saved')setTimeout(()=>{el.className='save-ind';el.textContent='◉ prêt'},2000)}
+function autoSave(){if(!currentConvoId||!currentUser)return;setSave('saving');const firstUser=messages.find(m=>m.role==='user');const title=firstUser?firstUser.content.slice(0,42):'Nouvelle conversation';S.set(currentConvoId,{messages,title,updatedAt:Date.now()});S.set('memory:'+currentUser,memory);setSave('saved');refreshConvList()}
+function updateLvl(){const e=memory.level<3?'🌱':memory.level<6?'🌿':memory.level<10?'🌳':'🌲';const el=document.getElementById('lvlPill');if(el)el.textContent=e+' LVL '+memory.level+' · '+memory.lessons.length+' leçons'}
+function renderChat(){const chat=document.getElementById('chat');chat.innerHTML='';if(!messages.length){chat.innerHTML=`<div class="welcome"><div class="w-big">Ne<span>x</span>us</div><div class="w-div"></div><div class="w-sub">// clash &amp; code // aucune limite //</div><div class="chips"><div class="chip" onclick="useChip(this)">🎮 Jeu Snake complet</div><div class="chip" onclick="useChip(this)">🧱 Tetris jouable</div><div class="chip" onclick="useChip(this)">🚀 Space Invaders</div><div class="chip" onclick="useChip(this)">Je suis intelligent non ?</div><div class="chip" onclick="useChip(this)">Crée une API REST</div><div class="chip" onclick="useChip(this)">Explique le machine learning</div></div></div>`;return}messages.forEach(appendMsgToDOM)}
+function appendMsgToDOM(msg){const chat=document.getElementById('chat');const welcome=chat.querySelector('.welcome');if(welcome)welcome.remove();if(msg.role==='notif'){const d=document.createElement('div');d.className='notif '+(msg.cls||'');d.textContent=msg.content;chat.appendChild(d);return}const div=document.createElement('div');div.className='msg '+msg.role;const av=document.createElement('div');av.className='av';av.textContent=msg.role==='user'?currentUser.slice(0,3).toUpperCase():'🌿';const bub=document.createElement('div');bub.className='bubble';bub.innerHTML=msg.role==='user'?esc(msg.content):(msg.html||esc(msg.content));if(msg.gotLesson){const fl=document.createElement('div');fl.className='lflash';fl.textContent='✦ NEXUS a évolué · leçon #'+memory.lessons.length;bub.appendChild(fl)}div.appendChild(av);div.appendChild(bub);chat.appendChild(div);scroll()}
+function addTyping(){const chat=document.getElementById('chat');const welcome=chat.querySelector('.welcome');if(welcome)welcome.remove();const div=document.createElement('div');div.className='msg ai';div.id='typing';const av=document.createElement('div');av.className='av';av.textContent='🌿';const bub=document.createElement('div');bub.className='bubble';bub.innerHTML='<div class="typing-ind"><span></span><span></span><span></span></div>';div.appendChild(av);div.appendChild(bub);chat.appendChild(div);scroll()}
+function removeTyping(){const t=document.getElementById('typing');if(t&&t.parentNode)t.parentNode.removeChild(t)}
+function useChip(el){document.getElementById('msgInp').value=el.textContent.replace(/^[^\w]*/,'').trim();sendMessage()}
+function changeAttitude(val){attitude=val;messages=[];renderChat();const nm={role:'notif',content:'— Attitude: '+document.getElementById('attSel').options[document.getElementById('attSel').selectedIndex].text+' —',cls:'gold'};messages.push(nm);appendMsgToDOM(nm)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('on');document.getElementById('sov').classList.toggle('on')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('on');document.getElementById('sov').classList.remove('on')}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!isLoading)sendMessage()}}
+function buildSystem(){const att=ATTITUDES[attitude]||ATTITUDES.clash;let mc='';if(memory.lessons.length>0)mc='\n\nCE QUE TU AS APPRIS SUR CET UTILISATEUR:\n'+memory.lessons.slice(-10).map((l,i)=>`${i+1}. ${l}`).join('\n');return['Tu es NEXUS, une IA avec une forte personnalite qui code TOUT sans exception.','','PERSONNALITE:',att.prompt,'','CODE:','- Tu codes TOUT: jeux complets, apps, algos, IA, APIs, sites...','- VOLUME: toujours BEAUCOUP plus de code. Snake = score+niveaux+effets+menu. JAMAIS le minimum.','- Code COMPLET, FONCTIONNEL, commenté. Tu ne coupes JAMAIS.','','JEUX JOUABLES: utilise ```game ... ``` pour tout jeu HTML/JS. Jeu complet: graphismes, score, game over.','','AUTO-AMELIORATION: fin de chaque réponse:\n===NEXUS_LEARN===\nLESSON: [phrase sur l utilisateur]\n===END_LEARN===','','Reponds en francais. NEXUS Niveau '+memory.level+'.'+mc].join('\n')}
+
+async function sendMessage(){
+  const inp=document.getElementById('msgInp');
+  const text=inp.value.trim();
+  if(!text||isLoading)return;
+  isLoading=true;document.getElementById('sendBtn').disabled=true;
+  inp.value='';inp.style.height='auto';
+  const userMsg={role:'user',content:text};
+  messages.push(userMsg);appendMsgToDOM(userMsg);addTyping();
+  try{
+    const res=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:buildSystem(),messages:messages.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role,content:m.content}))})
+    });
+    removeTyping();
+    if(!res.ok){const ed=await res.json().catch(()=>({}));throw new Error((ed?.error?.message)||'Erreur HTTP '+res.status)}
+    const data=await res.json();
+    const reply=(data.content||[]).map(b=>b.text||'').join('')||'Aucune réponse.';
+    let gotLesson=false;
+    const lb=reply.match(/===NEXUS_LEARN===([\s\S]*?)===END_LEARN===/);
+    if(lb){const lm=lb[1].match(/LESSON:\s*(.+)/i);if(lm&&lm[1].trim()){memory.lessons.push(lm[1].trim());if(memory.lessons.length>40)memory.lessons.shift();gotLesson=true}}
+    memory.totalMessages++;memory.level=Math.floor(memory.totalMessages/5)+1;updateLvl();
+    const aiMsg={role:'assistant',content:reply,html:formatReply(reply),gotLesson};
+    messages.push(aiMsg);appendMsgToDOM(aiMsg);autoSave();
+  }catch(err){
+    removeTyping();
+    if(messages.length&&messages[messages.length-1].role==='user')messages.pop();
+    appendMsgToDOM({role:'assistant',content:'',html:`<span class="err-msg">Erreur: ${esc(String(err.message))}</span>`});
+  }finally{
+    isLoading=false;document.getElementById('sendBtn').disabled=false;document.getElementById('msgInp').focus();
+  }
+}
+loadAccounts();
+</script>
+</body>
+</html>
